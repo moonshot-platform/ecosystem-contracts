@@ -9,11 +9,11 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      // forking: {
-      //   url: "https://bsc-dataseed.binance.org",
-      // },
+      forking: {
+        url: "https://bsc-dataseed.binance.org",
+      },
     },
-    bsctestnet: {
+    bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
       accounts: [OWNER_PRIVATE_KEY],
