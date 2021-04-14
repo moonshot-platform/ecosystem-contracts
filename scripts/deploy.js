@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat");
-const fs = require("hardhat");
+const fs = require("fs");
 
 const main = async () => {
   console.log("Deploying contracts to", network.name);

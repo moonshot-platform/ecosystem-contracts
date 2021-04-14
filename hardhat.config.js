@@ -22,6 +22,11 @@ module.exports = {
       url: `https://ropsten.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [ROPSTEN_PRIVATE_KEY],
     },
+    mainnet: {
+      url: "https://bsc-dataseed.binance.org",
+      chainId: 56,
+      accounts: [OWNER_PRIVATE_KEY],
+    },
   },
   solidity: {
     compilers: [
