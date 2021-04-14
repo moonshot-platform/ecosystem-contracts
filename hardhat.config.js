@@ -9,9 +9,9 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      forking: {
-        url: "https://bsc-dataseed.binance.org",
-      },
+      // forking: {
+      //   url: "https://bsc-dataseed.binance.org",
+      // },
     },
     bsctestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -35,7 +35,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 200,
           },
         },
       },
@@ -44,7 +44,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 200,
           },
         },
       },
