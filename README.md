@@ -55,3 +55,18 @@ npx hardhat run --network ropsten scripts/deploy.js
 ## Contracts
 ### Airdrop contract
 This contract is used for airdropping to our holders.
+- Contract completed.
+- Test cases written and passed.
+
+### Snapshot script
+Change the `SNAPSHOT_BLOCK_NUM` environment variable in `.env` to update the snapshot time before running.
+```bash
+npx hardhat run scripts/snapshot.js
+```
+Output file will be stored into a json file in `db/snapshot.json`
+
+### Airdrop script
+Before running airdrop, run snapshot with given snapshot blockNumber. Then change `AIRDROP_AMOUNT` in the `.env` file to specify how much you want to airdrop.
+```bash
+npx hardhat run scripts/snapshot.js
+```

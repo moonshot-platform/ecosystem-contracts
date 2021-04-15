@@ -67,7 +67,7 @@ const snapshot = async (blockNum) => {
   console.log(holders);
 
   const dbDir = "./db";
-  const fileName = `${dbDir}/snapshot-${blockNum}.json`;
+  const fileName = `${dbDir}/snapshot.json`;
   if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir);
   console.log("Writing holders data to file", fileName);
   fs.writeFileSync(fileName, JSON.stringify(holders), "utf8", () => {});
@@ -83,8 +83,7 @@ const retry = async (contract, args, n) => {
   throw new Error(`Failed retrying ${n} times`);
 };
 
-const SNAPSHOT_TIME = 6577999;
-snapshot(SNAPSHOT_TIME)
+snapshot(process.env.SNAPSHOT_BLOCK_NUM)
   .then(() => process.exit(0))
   .catch((err) => {
     console.error(err);
