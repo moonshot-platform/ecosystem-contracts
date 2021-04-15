@@ -65,6 +65,8 @@ npx hardhat run scripts/snapshot.js
 ```
 Output file will be stored into a json file in `db/snapshot.json`
 
+NOTES: Since BSC network might fluctuate and fails the request more than the default 5 times, increase the `MAX_RETRY` to the number you think reasonable.
+
 ### Airdrop script
 Before running airdrop, run snapshot with given snapshot blockNumber. Then change `AIRDROP_AMOUNT` in the `.env` file to specify how much you want to airdrop.
 ```bash

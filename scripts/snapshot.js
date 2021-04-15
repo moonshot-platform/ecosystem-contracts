@@ -13,7 +13,8 @@ const snapshot = async (blockNum) => {
     fs.readFileSync("./artifacts/contracts/Moonshot.sol/Moonshot.json")
   ).abi;
   const contract = new ethers.Contract(contractAddress, abi, provider);
-  const LIMIT_BLOCK_RANGE = 5000;
+  const LIMIT_BLOCK_RANGE = 1000;
+  const MAX_RETRY = 5;
   const holders = {};
   let transferEvents;
 
@@ -34,7 +35,7 @@ const snapshot = async (blockNum) => {
     transferEvents = await retry(
       contract,
       ["Transfer", initBlockNum, endBlockNum],
-      5
+      MAX_RETRY
     );
     console.log("Number of events", transferEvents.length);
     transferEvents.forEach((event) => {
