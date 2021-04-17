@@ -22,7 +22,7 @@ const snapshot = async (initBlockNum, blockNum, tokenContract, opts = {}) => {
     if (initBlockNum + limitBlockRange >= blockNum) {
       endBlockNum = blockNum;
     }
-    console.log("Querying for block %s to %s", initBlockNum, endBlockNum);
+    console.log(`Querying for block ${initBlockNum} to ${endBlockNum}`);
     transferEvents = await retry(
       tokenContract,
       ["Transfer", initBlockNum, endBlockNum],
