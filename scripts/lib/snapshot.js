@@ -60,8 +60,6 @@ const snapshot = async (initBlockNum, blockNum, tokenContract, opts = {}) => {
   return holders;
 };
 
-const airdrop = async () => {};
-
 const retry = async (contract, args, n) => {
   for (let i = 0; i < n; i++) {
     try {
@@ -78,5 +76,4 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 module.exports = {
   snapshot,
-  airdrop,
 };

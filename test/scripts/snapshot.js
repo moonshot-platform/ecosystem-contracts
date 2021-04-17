@@ -5,9 +5,9 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const { expect } = chai;
 const fs = require("fs");
-const { snapshot } = require("../../scripts/lib/airdrop.js");
+const { snapshot } = require("../../scripts/lib/snapshot.js");
 
-describe("airdrop script", () => {
+describe("snapshot lib", () => {
   describe("#snapshot", () => {
     let owner, alice, bob, carol, david, elon, fomo;
     let aliceBalance, bobBalance, carolBalance, davidBalance, elonBalance;

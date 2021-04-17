@@ -59,13 +59,19 @@ This contract is used for airdropping to our holders.
 - Test cases written and passed.
 
 ### Snapshot script
-Change the `SNAPSHOT_BLOCK_NUM` environment variable in `.env` to update the snapshot time before running.
+Change the following environment variable in `.env` to update the snapshot variables before running.
+- `SNAPSHOT_INIT_BLOCK_NUM` for initial block number you want to start snapshoting.
+- `SNAPSHOT_BLOCK_NUM` is the block number you want to end snapshotting.
+- `MOONSHOT_CONTRACT_ADDRESS` is the contract address of Moonshot on the current network you want to run snapshot against.
 ```bash
 npx hardhat run scripts/snapshot.js
-```
-Output file will be stored into a json file in `db/snapshot.json`
 
-NOTES: Since BSC network might fluctuate and fails the request more than the default 5 times, increase the `MAX_RETRY` to the number you think reasonable.
+# For mainnet
+npx hardhat run --network mainnet scripts/snapshot.js
+```
+Output file will be stored into a json file in `db/snapshot-<NETWORK_NAME>.json`
+
+NOTES: Since BSC network might fluctuate and fails the request more than the default 5 times, increase the `MAX_RETRIES` to the number you think reasonable.
 
 ### Airdrop script
 Before running airdrop, run snapshot with given snapshot blockNumber. Then change `AIRDROP_AMOUNT` in the `.env` file to specify how much you want to airdrop.
