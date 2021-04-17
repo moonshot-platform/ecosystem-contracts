@@ -19,6 +19,7 @@ contract Airdrop is Context, Ownable {
     function sendBatch(address[] calldata recipients, uint256[] calldata recipientsBalance, uint256 totalAmount) external onlyOwner {
         require(recipients.length == recipientsBalance.length, "Airdrop::sendBatch: unbalanced recipients data");
         require(totalAmount > 0, "Airdrop::sendBatch: totalAmount must be positive");
+        require(totalAmount <= token.balanceOf(address(this)), "Airdrop::sendBatch: insufficient balance");
         uint256 totalShare = 0;
         for (uint256 i = 0; i < recipientsBalance.length; i++) {
             totalShare = totalShare.add(recipientsBalance[i]);

@@ -55,6 +55,13 @@ describe("Airdrop", () => {
           0
         )
       ).to.be.revertedWith("Airdrop::sendBatch: totalAmount must be positive");
+      expect(
+        airdrop.sendBatch(
+          [alice.address, bob.address, carol.address],
+          [50000, 45000, 5000],
+          1e10
+        )
+      ).to.be.revertedWith("Airdrop::sendBatch: insufficient balance");
     });
   });
 });
