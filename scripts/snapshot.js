@@ -17,7 +17,7 @@ const main = async () => {
     // Deployment block: https://bscscan.com/tx/0xfbaf0d30957115c982abee3f28a649f1e901c2bc7129b2ba9300cedef7a17eec
   }
   const tokenContract = new ethers.Contract(contractAddress, abi, provider);
-  const LIMIT_BLOCK_RANGE = 5000;
+  const LIMIT_BLOCK_RANGE = 1000;
   const MAX_RETRIES = 5;
 
   const holders = await snapshot(

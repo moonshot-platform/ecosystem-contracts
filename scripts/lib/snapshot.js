@@ -2,9 +2,10 @@ const { ethers } = require("hardhat");
 const { BigNumber } = ethers;
 
 const snapshot = async (initBlockNum, blockNum, tokenContract, opts = {}) => {
-  const limitBlockRange = opts.limitBlockRange || 5000;
-  const maxRetries = opts.maxRetries || 5;
+  const limitBlockRange = BigNumber.from(opts.limitBlockRange || 5000).toNumber();
+  const maxRetries = BigNumber.from(opts.maxRetries || 5).toNumber();
   const tokenContractAddress = tokenContract.address.toLowerCase();
+  const snapshotBlockNum = BigNumber.from(blockNum).toNumber();
   const holders = {};
   let transferEvents;
 
@@ -17,10 +18,10 @@ const snapshot = async (initBlockNum, blockNum, tokenContract, opts = {}) => {
   )[0];
   holders[firstEvent.args.from] = BigNumber.from(firstEvent.args.value);
 
-  while (initBlockNum <= blockNum) {
+  while (initBlockNum <= snapshotBlockNum) {
     let endBlockNum = initBlockNum + limitBlockRange;
-    if (initBlockNum + limitBlockRange >= blockNum) {
-      endBlockNum = blockNum;
+    if (initBlockNum + limitBlockRange >= snapshotBlockNum) {
+      endBlockNum = snapshotBlockNum;
     }
     console.log(`Querying for block ${initBlockNum} to ${endBlockNum}`);
     transferEvents = await retry(
