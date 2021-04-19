@@ -6,3 +6,4 @@ artifacts/
 coverage*
 .env
 db/snapshot*.json
+tmp

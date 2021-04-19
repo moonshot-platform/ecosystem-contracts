@@ -71,10 +71,13 @@ npx hardhat run --network mainnet scripts/snapshot.js
 ```
 Output file will be stored into a json file in `db/snapshot-<NETWORK_NAME>.json`
 
-NOTES: Since BSC network might fluctuate and fails the request more than the default 5 times, increase the `MAX_RETRIES` to the number you think reasonable.
+NOTES:
+- Since BSC network might fluctuate and fails the request more than the default 5 times, increase the `MAX_RETRIES` to the number you think reasonable.
+- The snapshot doesn't work correctly for reflection tokens due to incorrect Transfer event value.
 
 ### Airdrop script
-Before running airdrop, run snapshot with given snapshot blockNumber. Then change `AIRDROP_AMOUNT` in the `.env` file to specify how much you want to airdrop.
+Before running airdrop, download list of holders from bscscan into a csv file and pass the path of that file to environment variable `MOONSHOT_HOLDERS_CSV_PATH`.
+Then change `AIRDROP_AMOUNT` in the `.env` file to specify how much you want to airdrop.
 ```bash
 npx hardhat run scripts/snapshot.js
 ```
