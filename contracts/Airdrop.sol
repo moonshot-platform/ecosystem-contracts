@@ -29,9 +29,6 @@ contract Airdrop is Context, Ownable {
 
         for (uint256 i = 0; i < recipients.length; i++) {
             airdropAmount = totalAmount.mul(recipientsBalance[i]).div(totalShare);
-            if (i == (recipients.length - 1)) {
-                airdropAmount = totalAmountLeft;
-            }
             if (airdropAmount > 0) {
                 token.transfer(recipients[i], airdropAmount);
                 totalAmountLeft = totalAmountLeft.sub(airdropAmount);
