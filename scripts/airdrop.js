@@ -7,31 +7,38 @@ const csvParse = require("csv-parse/lib/sync");
 // This command requires running snapshot first
 // CMD: npx hardhat run --network mainnet scripts/airdrop.js
 const main = async () => {
-  const amount = process.env.AIRDROP_AMOUNT;
+  const AIRDROP_AMOUNT = process.env.AIRDROP_AMOUNT || 0;
+  if (AIRDROP_AMOUNT <= 0)
+    throw new Error("Airdrop amount must be greater than 0");
+  const AIRDROP_CONTRACT_ADDRESS = process.env.AIRDROP_CONTRACT_ADDRESS || "";
+  const MOONSHOT_HOLDERS_CSV_PATH = process.env.MOONSHOT_HOLDERS_CSV_PATH || "";
+  const OWNER_PRIVATE_KEY = process.env.OWNER_PRIVATE_KEY || "";
+
   const provider = new ethers.providers.JsonRpcProvider(network.config.url);
-  const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY).connect(
-    provider
-  );
+  const signer = new ethers.Wallet(OWNER_PRIVATE_KEY).connect(provider);
   const abi = JSON.parse(
     fs.readFileSync("./artifacts/contracts/Airdrop.sol/Airdrop.json")
   ).abi;
   const contract = new ethers.Contract(
-    process.env.AIRDROP_CONTRACT_ADDRESS,
+    AIRDROP_CONTRACT_ADDRESS,
     abi,
     provider
   ).connect(signer);
-  const csvFile = fs.readFileSync(process.env.MOONSHOT_HOLDERS_CSV_PATH);
-  const holders = parseHolders(csvFile.toString());
+  const csvFile = fs.readFileSync(MOONSHOT_HOLDERS_CSV_PATH);
+  const holders = await parseHolders(csvFile.toString());
 
   console.log(
-    `Starting airdrop ${amount} to ${holders.length} holders on ${network.name}`
+    `Starting airdrop ${AIRDROP_AMOUNT} Moonshot to ${
+      Object.keys(holders).length
+    } holders on ${network.name}`
   );
-  await contract.sendBatch(
+  const transaction = await contract.sendBatch(
     Object.keys(holders),
     Object.values(holders),
-    amount
+    AIRDROP_AMOUNT
   );
-  console.log(`Finished!`);
+  console.log(`Airdrop finished!`);
+  console.log("Transaction hash:", transaction.hash);
 };
 
 main()

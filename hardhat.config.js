@@ -1,17 +1,20 @@
 require("dotenv").config();
 require("@nomiclabs/hardhat-waffle");
+require("@nomiclabs/hardhat-etherscan");
 
 const OWNER_PRIVATE_KEY = process.env.OWNER_PRIVATE_KEY || "";
 const INFURA_API_KEY = process.env.INFURA_API_KEY || "";
 const ROPSTEN_PRIVATE_KEY = process.env.ROPSTEN_PRIVATE_KEY;
+// Etherscan or BSCscan API key
+const BLOCK_EXPLORER_API_KEY = process.env.BLOCK_EXPLORER_API_KEY || "";
 
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      forking: {
-        url: "https://bsc-dataseed.binance.org",
-      },
+      // forking: {
+      //   url: "https://bsc-dataseed.binance.org",
+      // },
     },
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -28,19 +31,13 @@ module.exports = {
       accounts: [OWNER_PRIVATE_KEY],
     },
   },
+  etherscan: {
+    apiKey: BLOCK_EXPLORER_API_KEY,
+  },
   solidity: {
     compilers: [
       {
         version: "0.6.12",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      {
-        version: "0.7.4",
         settings: {
           optimizer: {
             enabled: true,
