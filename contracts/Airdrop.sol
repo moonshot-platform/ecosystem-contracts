@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.7.4;
+pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import "hardhat/console.sol";
 
 contract Airdrop is Context, Ownable {
     using SafeMath for uint256;
@@ -24,14 +26,12 @@ contract Airdrop is Context, Ownable {
         for (uint256 i = 0; i < recipientsBalance.length; i++) {
             totalShare = totalShare.add(recipientsBalance[i]);
         }
-        uint256 totalAmountLeft = totalAmount;
         uint256 airdropAmount;
 
         for (uint256 i = 0; i < recipients.length; i++) {
             airdropAmount = totalAmount.mul(recipientsBalance[i]).div(totalShare);
-            if (airdropAmount > 0) {
+            if (recipients[i] != address(this) && airdropAmount > 0) {
                 token.transfer(recipients[i], airdropAmount);
-                totalAmountLeft = totalAmountLeft.sub(airdropAmount);
             }
         }
     }
