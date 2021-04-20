@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { ethers } = require("hardhat");
 const fs = require("fs");
-const { airdrop } = require("./lib/airdrop.js");
+const { parseHolders } = require("./lib/airdrop.js");
 const csvParse = require("csv-parse/lib/sync");
 
 // This command requires running snapshot first
@@ -20,17 +20,8 @@ const main = async () => {
     abi,
     provider
   ).connect(signer);
-  const holders = {};
-
   const csvFile = fs.readFileSync(process.env.MOONSHOT_HOLDERS_CSV_PATH);
-  const rows = csvParse(csvFile.toString(), {
-    columns: true,
-    skip_empty_lines: true,
-  });
-  rows.forEach((row) => {
-    const balance = parseFloat(row.Balance).toFixed(9)
-    holders[row.HolderAddress] = ethers.utils.parseEther(balance).div(1e9);
-  });
+  const holders = parseHolders(csvFile.toString());
 
   console.log(
     `Starting airdrop ${amount} to ${holders.length} holders on ${network.name}`
