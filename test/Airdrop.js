@@ -21,7 +21,7 @@ describe("Airdrop", () => {
     );
     airdrop = await deployContract(owner, Airdrop, [mockERC20.address]);
     await mockERC20.mint(alice.address, 50000);
-    await mockERC20.mint(bob.address, 45000);
+    await mockERC20.mint(bob.address, 44000);
     await mockERC20.mint(carol.address, 5000);
   });
 
@@ -29,14 +29,15 @@ describe("Airdrop", () => {
     it("should correctly airdrop to accounts according to their proportion", async () => {
       await mockERC20.mint(airdrop.address, 1000);
       await airdrop.sendBatch(
-        [alice.address, bob.address, carol.address],
-        [50000, 45000, 5000],
+        [alice.address, bob.address, carol.address, airdrop.address],
+        [50000, 44000, 5000, 1000],
         1000
       );
       console.log(alice.address);
       expect(await mockERC20.balanceOf(alice.address)).to.eq(50500);
-      expect(await mockERC20.balanceOf(bob.address)).to.eq(45450);
+      expect(await mockERC20.balanceOf(bob.address)).to.eq(44440);
       expect(await mockERC20.balanceOf(carol.address)).to.eq(5050);
+      expect(await mockERC20.balanceOf(airdrop.address)).to.eq(10);
     });
 
     it("should revert on exception", async () => {
@@ -44,17 +45,24 @@ describe("Airdrop", () => {
       expect(
         airdrop.sendBatch(
           [alice.address, bob.address],
-          [50000, 45000, 5000],
+          [50000, 44000, 5000],
           1000
         )
       ).to.be.revertedWith("Airdrop::sendBatch: unbalanced recipients data");
       expect(
         airdrop.sendBatch(
           [alice.address, bob.address, carol.address],
-          [50000, 45000, 5000],
+          [50000, 44000, 5000],
           0
         )
       ).to.be.revertedWith("Airdrop::sendBatch: totalAmount must be positive");
+      expect(
+        airdrop.sendBatch(
+          [alice.address, bob.address, carol.address],
+          [50000, 44000, 5000],
+          1e10
+        )
+      ).to.be.revertedWith("Airdrop::sendBatch: insufficient balance");
     });
   });
 });

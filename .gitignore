@@ -6,3 +6,6 @@ artifacts/
 coverage*
 .env
 db/snapshot*.json
+db/holders.csv
+tmp/*
+out/*
