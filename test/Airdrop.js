@@ -33,11 +33,26 @@ describe("Airdrop", () => {
         [50000, 44000, 5000, 1000],
         1000
       );
-      console.log(alice.address);
       expect(await mockERC20.balanceOf(alice.address)).to.eq(50500);
       expect(await mockERC20.balanceOf(bob.address)).to.eq(44440);
       expect(await mockERC20.balanceOf(carol.address)).to.eq(5050);
       expect(await mockERC20.balanceOf(airdrop.address)).to.eq(10);
+    });
+
+    it("should accept large enough input data", async () => {
+      await mockERC20.mint(airdrop.address, 1000);
+      const wallets = new Array(100).fill(alice.address);
+      const balances = new Array(100).fill(1000);
+      expect(airdrop.sendBatch(wallets, balances, 1000)).to.not.be.rejected;
+    });
+
+    it("should fail when exceeding block gas limit", async () => {
+      await mockERC20.mint(airdrop.address, 1000);
+      const wallets = new Array(1000).fill(alice.address);
+      const balances = new Array(1000).fill(1000);
+      expect(airdrop.sendBatch(wallets, balances, 1000)).to.be.rejectedWith(
+        "Transaction ran out of gas"
+      );
     });
 
     it("should revert on exception", async () => {
