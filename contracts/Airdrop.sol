@@ -11,13 +11,16 @@ contract Airdrop is Context, Ownable {
     using SafeMath for uint256;
 
     IERC20 public token;
+    uint256 public batchLimit;
 
     constructor(address _token) public {
         token = IERC20(_token);
+        batchLimit = 100;
     }
 
     function sendBatch(address[] calldata recipients, uint256[] calldata recipientsBalance, uint256 totalAmount) external onlyOwner {
         require(recipients.length == recipientsBalance.length, "Airdrop::sendBatch: unbalanced recipients data");
+        require(recipients.length <= batchLimit, "Airdrop::sendBatch: exceeds batch limit");
         require(totalAmount > 0, "Airdrop::sendBatch: totalAmount must be positive");
         require(totalAmount <= token.balanceOf(address(this)), "Airdrop::sendBatch: insufficient balance");
         uint256 totalShare = 0;
@@ -32,5 +35,9 @@ contract Airdrop is Context, Ownable {
                 token.transfer(recipients[i], airdropAmount);
             }
         }
+    }
+
+    function setBatchLimit(uint256 _batchLimit) external onlyOwner {
+        batchLimit = _batchLimit;
     }
 }

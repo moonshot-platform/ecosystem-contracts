@@ -20,12 +20,23 @@ describe("Airdrop", () => {
       fs.readFileSync("./artifacts/contracts/Airdrop.sol/Airdrop.json")
     );
     airdrop = await deployContract(owner, Airdrop, [mockERC20.address]);
-    await mockERC20.mint(alice.address, 50000);
-    await mockERC20.mint(bob.address, 44000);
-    await mockERC20.mint(carol.address, 5000);
+  });
+
+  describe("#setBatchLimit", () => {
+    it("should correctly set batch limit", async () => {
+      expect(await airdrop.batchLimit()).to.eq(100);
+      await airdrop.setBatchLimit(1000);
+      expect(await airdrop.batchLimit()).to.eq(1000);
+    });
   });
 
   describe("#sendBatch", () => {
+    beforeEach(async () => {
+      await mockERC20.mint(alice.address, 50000);
+      await mockERC20.mint(bob.address, 44000);
+      await mockERC20.mint(carol.address, 5000);
+    });
+
     it("should correctly airdrop to accounts according to their proportion", async () => {
       await mockERC20.mint(airdrop.address, 1000);
       await airdrop.sendBatch(
@@ -47,9 +58,11 @@ describe("Airdrop", () => {
     });
 
     it("should fail when exceeding block gas limit", async () => {
+      const batchLimit = 10000;
       await mockERC20.mint(airdrop.address, 1000);
-      const wallets = new Array(1000).fill(alice.address);
-      const balances = new Array(1000).fill(1000);
+      await airdrop.setBatchLimit(batchLimit);
+      const wallets = new Array(batchLimit).fill(alice.address);
+      const balances = new Array(batchLimit).fill(1000);
       expect(airdrop.sendBatch(wallets, balances, 1000)).to.be.rejectedWith(
         "Transaction ran out of gas"
       );
