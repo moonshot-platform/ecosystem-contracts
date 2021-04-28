@@ -3,7 +3,7 @@ const fs = require("fs");
 const csvParse = require("csv-parse/lib/sync");
 
 const parseHolders = async (data) => {
-  const holders = {};
+  const holders = [];
 
   const rows = csvParse(data, {
     columns: true,
@@ -16,7 +16,10 @@ const parseHolders = async (data) => {
 
   rows.forEach((row) => {
     const balance = parseFloat(row.Balance).toFixed(9);
-    holders[row.HolderAddress] = ethers.utils.parseEther(balance).div(1e9);
+    holders.push({
+      address: row.HolderAddress,
+      balance: ethers.utils.parseEther(balance).div(1e9)
+    });
   });
 
   return holders;
