@@ -1,8 +1,10 @@
 const { expect } = require("chai");
-const { parseHolders } = require("../../scripts/lib/airdrop.js");
+const { ethers } = require("hardhat");
+const { BigNumber } = ethers;
+const { splitBatches, parseHolders } = require("../../scripts/lib/airdrop.js");
 
 describe("airdrop lib", () => {
-  describe("#holdersParse", () => {
+  describe("#parseHolders", () => {
     it("should parse data correctly", async () => {
       const input = `
 "HolderAddress","Balance"
@@ -30,6 +32,168 @@ describe("airdrop lib", () => {
       // this one is weird because of floating point number
       expect(holders[6].address.toString()).to.eq("address6");
       expect(holders[6].balance.toString()).to.eq("12345678901234568359375");
+    });
+  });
+
+  describe("#splitBatches", () => {
+    it("should return empty when holders input is empty", () => {
+      expect(splitBatches([], 100, 1e6)).to.eql([]);
+    });
+
+    context("when holders are not empty", () => {
+      let holders;
+
+      beforeEach(() => {
+        holders = [
+          {
+            address: "address0",
+            balance: BigNumber.from(50e9),
+          },
+          {
+            address: "address1",
+            balance: BigNumber.from(20e9),
+          },
+          {
+            address: "address2",
+            balance: BigNumber.from(15e9),
+          },
+          {
+            address: "address3",
+            balance: BigNumber.from(5e9),
+          },
+          {
+            address: "address4",
+            balance: BigNumber.from(4e9),
+          },
+          {
+            address: "address5",
+            balance: BigNumber.from(3e9),
+          },
+          {
+            address: "address6",
+            balance: BigNumber.from(2e9),
+          },
+          {
+            address: "address7",
+            balance: ethers.utils.parseEther("0.999999").div(1e9),
+          },
+          {
+            address: "address8",
+            balance: ethers.utils.parseEther("0.000001").div(1e9),
+          },
+        ];
+      });
+
+      it("should split holders and amount correctly", () => {
+        const batchedHolders = splitBatches(holders, 3, 1e6);
+        expect(Object.keys(batchedHolders).length).to.eq(3);
+        expect(batchedHolders).to.eql([
+          {
+            holders: [
+              {
+                address: "address0",
+                balance: BigNumber.from(50e9),
+              },
+              {
+                address: "address1",
+                balance: BigNumber.from(20e9),
+              },
+              {
+                address: "address2",
+                balance: BigNumber.from(15e9),
+              },
+            ],
+            amount: 850_000,
+          },
+          {
+            holders: [
+              {
+                address: "address3",
+                balance: BigNumber.from(5e9),
+              },
+              {
+                address: "address4",
+                balance: BigNumber.from(4e9),
+              },
+              {
+                address: "address5",
+                balance: BigNumber.from(3e9),
+              },
+            ],
+            amount: 120_000,
+          },
+          {
+            holders: [
+              {
+                address: "address6",
+                balance: BigNumber.from(2e9),
+              },
+              {
+                address: "address7",
+                balance: ethers.utils.parseEther("0.999999").div(1e9),
+              },
+              {
+                address: "address8",
+                balance: ethers.utils.parseEther("0.000001").div(1e9),
+              },
+            ],
+            amount: 30_000,
+          },
+        ]);
+      });
+
+      it("should split holders and amount correctly", () => {
+        const batchedHolders = splitBatches(holders, 5, 1e6);
+        expect(Object.keys(batchedHolders).length).to.eq(2);
+        expect(batchedHolders).to.eql([
+          {
+            holders: [
+              {
+                address: "address0",
+                balance: BigNumber.from(50e9),
+              },
+              {
+                address: "address1",
+                balance: BigNumber.from(20e9),
+              },
+              {
+                address: "address2",
+                balance: BigNumber.from(15e9),
+              },
+              {
+                address: "address3",
+                balance: BigNumber.from(5e9),
+              },
+              {
+                address: "address4",
+                balance: BigNumber.from(4e9),
+              },
+            ],
+            amount: 940_000,
+          },
+          {
+            holders: [
+              {
+                address: "address5",
+                balance: BigNumber.from(3e9),
+              },
+              {
+                address: "address6",
+                balance: BigNumber.from(2e9),
+              },
+              {
+                address: "address7",
+                balance: ethers.utils.parseEther("0.999999").div(1e9),
+              },
+              {
+                address: "address8",
+                balance: ethers.utils.parseEther("0.000001").div(1e9),
+              },
+            ],
+            amount: 60_000,
+          },
+        ]);
+      });
     });
   });
 });

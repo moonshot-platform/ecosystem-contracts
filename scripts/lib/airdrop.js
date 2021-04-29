@@ -1,5 +1,4 @@
 const { ethers } = require("hardhat");
-const fs = require("fs");
 const csvParse = require("csv-parse/lib/sync");
 
 const parseHolders = async (data) => {
@@ -18,13 +17,67 @@ const parseHolders = async (data) => {
     const balance = parseFloat(row.Balance).toFixed(9);
     holders.push({
       address: row.HolderAddress,
-      balance: ethers.utils.parseEther(balance).div(1e9)
+      balance: ethers.utils.parseEther(balance).div(1e9),
     });
   });
 
   return holders;
 };
 
+const splitBatches = (holders, batch, totalAmount) => {
+  const batchHoldersWithAmount = [];
+  let i, j;
+  const totalBalance = holders.reduce(reducer, 0);
+  if (totalBalance == NaN) {
+    throw new Error("totalBalance must be a number");
+  }
+
+  for (i = 0; i < holders.length; i += batch) {
+    const batchHolders = holders.slice(i, i + batch);
+    const batchAmount =
+      (batchHolders.reduce(reducer, 0) * totalAmount) / totalBalance;
+    batchHoldersWithAmount.push({
+      holders: batchHolders,
+      amount: batchAmount,
+    });
+  }
+  return batchHoldersWithAmount;
+};
+
+const sendInBatches = async (contract, holders, batch, totalAmount) => {
+  const batchHoldersWithAmountGroups = splitBatches(holders, batch, totalAmount); 
+  const failedBatches = []
+
+  batchHoldersWithAmountGroups.forEach((batchHoldersWithAmountGroup) => {
+    const batchHolders = batchHoldersWithAmountGroup.holders;
+    let transaction
+
+    try {
+      transaction = await contract.sendBatch(
+        holders.map((holder) => {
+          return holder.address;
+        }),
+        holders.map((holder) => {
+          return holder.balance;
+        }),
+        batchHoldersWithAmountGroup.amount,
+      );
+      console.log(
+        `Finished airdrop to ${batchHolders.length} holders at tx ${transaction.hash}`
+      );
+    } catch {
+      failedBatches.push(batchHoldersWithAmountGroup);
+    }
+    return failedBatches;
+  });
+};
+
+const reducer = (sum, holder) => {
+  return holder.balance.add(sum);
+};
+
 module.exports = {
   parseHolders,
-}
+  splitBatches,
+  sendInBatches,
+};
