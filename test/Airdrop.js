@@ -22,6 +22,29 @@ describe("Airdrop", () => {
     airdrop = await deployContract(owner, Airdrop, [mockERC20.address]);
   });
 
+  describe("#initialize", () => {
+    beforeEach(async () => {
+      await mockERC20.mint(alice.address, 50000);
+      await mockERC20.mint(bob.address, 44000);
+    });
+
+    it("should clear all recipients mapping", async () => {
+      await mockERC20.mint(airdrop.address, 1000);
+      await airdrop.sendBatch(
+        [alice.address, bob.address, airdrop.address],
+        [50000, 49000, 1000],
+        1000
+      );
+      expect(await airdrop.receivedRecipient(alice.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(bob.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(airdrop.address)).to.eq(false);
+      await airdrop.initialize();
+      expect(await airdrop.receivedRecipient(alice.address)).to.eq(false);
+      expect(await airdrop.receivedRecipient(bob.address)).to.eq(false);
+      expect(await airdrop.receivedRecipient(airdrop.address)).to.eq(false);
+    });
+  })
+
   describe("#setBatchLimit", () => {
     it("should correctly set batch limit", async () => {
       expect(await airdrop.batchLimit()).to.eq(100);
@@ -48,6 +71,40 @@ describe("Airdrop", () => {
       expect(await mockERC20.balanceOf(bob.address)).to.eq(44440);
       expect(await mockERC20.balanceOf(carol.address)).to.eq(5050);
       expect(await mockERC20.balanceOf(airdrop.address)).to.eq(10);
+      expect(await airdrop.receivedRecipient(alice.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(bob.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(carol.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(airdrop.address)).to.eq(false);
+    });
+
+    it("should not resend airdrop to received accounts", async () => {
+      await mockERC20.mint(airdrop.address, 2000);
+      await airdrop.sendBatch(
+        [alice.address, bob.address, airdrop.address],
+        [50000, 49000, 1000],
+        1000
+      );
+      expect(await mockERC20.balanceOf(alice.address)).to.eq(50500);
+      expect(await mockERC20.balanceOf(bob.address)).to.eq(44490);
+      expect(await mockERC20.balanceOf(carol.address)).to.eq(5000);
+      expect(await mockERC20.balanceOf(airdrop.address)).to.eq(1010);
+      expect(await airdrop.receivedRecipient(alice.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(bob.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(carol.address)).to.eq(false);
+      expect(await airdrop.receivedRecipient(airdrop.address)).to.eq(false);
+      await airdrop.sendBatch(
+        [alice.address, bob.address, carol.address, airdrop.address],
+        [50000, 44000, 5000, 1000],
+        1000
+      );
+      expect(await mockERC20.balanceOf(alice.address)).to.eq(50500);
+      expect(await mockERC20.balanceOf(bob.address)).to.eq(44490);
+      expect(await mockERC20.balanceOf(carol.address)).to.eq(5050);
+      expect(await mockERC20.balanceOf(airdrop.address)).to.eq(960);
+      expect(await airdrop.receivedRecipient(alice.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(bob.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(carol.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(airdrop.address)).to.eq(false);
     });
 
     it("should accept large enough input data", async () => {
@@ -66,6 +123,7 @@ describe("Airdrop", () => {
       expect(airdrop.sendBatch(wallets, balances, 1000)).to.be.rejectedWith(
         "Transaction ran out of gas"
       );
+      expect(await airdrop.receivedRecipient(alice.address)).to.not.eq(true);
     });
 
     it("should revert on exception", async () => {

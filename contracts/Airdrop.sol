@@ -12,10 +12,19 @@ contract Airdrop is Context, Ownable {
 
     IERC20 public token;
     uint256 public batchLimit;
+    address[] private received;
+    mapping (address => bool) public receivedRecipient;
 
     constructor(address _token) public {
         token = IERC20(_token);
+        initialize();
         batchLimit = 100;
+    }
+
+    function initialize() public onlyOwner {
+        for (uint256 i = 0; i < received.length; i++) {
+            receivedRecipient[received[i]] = false;
+        }
     }
 
     function sendBatch(address[] calldata recipients, uint256[] calldata recipientsBalance, uint256 totalAmount) external onlyOwner {
@@ -31,8 +40,10 @@ contract Airdrop is Context, Ownable {
 
         for (uint256 i = 0; i < recipients.length; i++) {
             airdropAmount = totalAmount.mul(recipientsBalance[i]).div(totalShare);
-            if (recipients[i] != address(this) && airdropAmount > 0) {
+            if (receivedRecipient[recipients[i]] != true && recipients[i] != address(this) && airdropAmount > 0) {
                 token.transfer(recipients[i], airdropAmount);
+                receivedRecipient[recipients[i]] = true;
+                received.push(recipients[i]);
             }
         }
     }
