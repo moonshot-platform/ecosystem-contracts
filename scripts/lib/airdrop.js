@@ -46,9 +46,8 @@ const splitBatches = (holders, batch, totalAmount) => {
 
 const sendInBatches = async (contract, holders, batch, totalAmount) => {
   const batchHoldersWithAmountGroups = splitBatches(holders, batch, totalAmount); 
-  const failedBatches = []
 
-  batchHoldersWithAmountGroups.forEach((batchHoldersWithAmountGroup) => {
+  const failedBatchesPromises = batchHoldersWithAmountGroups.map(async (batchHoldersWithAmountGroup) => {
     const batchHolders = batchHoldersWithAmountGroup.holders;
     let transaction
 
@@ -65,11 +64,13 @@ const sendInBatches = async (contract, holders, batch, totalAmount) => {
       console.log(
         `Finished airdrop to ${batchHolders.length} holders at tx ${transaction.hash}`
       );
-    } catch {
-      failedBatches.push(batchHoldersWithAmountGroup);
+    } catch(e) {
+      console.log(`Failed to airdrop with errors: ${e}`);
+      return batchHoldersWithAmountGroup;
     }
-    return failedBatches;
   });
+  const failedBatches = (await Promise.all(failedBatchesPromises)).filter((item) => { return item != undefined });
+  return failedBatches;
 };
 
 const reducer = (sum, holder) => {

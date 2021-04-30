@@ -1,7 +1,16 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers, waffle } = require("hardhat");
+const { deployContract } = waffle;
+const chai = require("chai");
+const chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
+const { expect } = chai;
 const { BigNumber } = ethers;
-const { splitBatches, parseHolders } = require("../../scripts/lib/airdrop.js");
+const fs = require("fs");
+const {
+  parseHolders,
+  splitBatches,
+  sendInBatches,
+} = require("../../scripts/lib/airdrop.js");
 
 describe("airdrop lib", () => {
   describe("#parseHolders", () => {
@@ -194,6 +203,76 @@ describe("airdrop lib", () => {
           },
         ]);
       });
+    });
+  });
+
+  describe("#sendInBatches", () => {
+    let owner, alice, bob;
+    let mockERC20, airdrop;
+
+    beforeEach(async () => {
+      [owner, alice, bob, carol, david] = await ethers.getSigners();
+      const MockERC20 = JSON.parse(
+        fs.readFileSync(
+          "./artifacts/contracts/test/MockERC20.sol/MockERC20.json"
+        )
+      );
+      mockERC20 = await deployContract(owner, MockERC20, []);
+      const Airdrop = JSON.parse(
+        fs.readFileSync("./artifacts/contracts/Airdrop.sol/Airdrop.json")
+      );
+      airdrop = await deployContract(owner, Airdrop, [mockERC20.address]);
+    });
+
+    it("should send airdrop in batches", async () => {
+      await mockERC20.mint(airdrop.address, 1000);
+      const holders = [
+        {
+          address: alice.address,
+          balance: BigNumber.from(100),
+        },
+        {
+          address: bob.address,
+          balance: BigNumber.from(400),
+        },
+      ];
+      const failedBatches = await sendInBatches(airdrop, holders, 1, 1000);
+      expect(failedBatches).to.be.empty;
+    });
+
+    it("should return failed batches of airdrop", async () => {
+      const holders = [
+        {
+          address: alice.address,
+          balance: BigNumber.from(100),
+        },
+        {
+          address: bob.address,
+          balance: BigNumber.from(400),
+        },
+      ];
+      const failedBatches = await sendInBatches(airdrop, holders, 1, 0);
+      expect(failedBatches.length).to.eq(2);
+      expect(failedBatches).to.eql([
+        {
+          holders: [
+            {
+              address: alice.address,
+              balance: BigNumber.from(100),
+            },
+          ],
+          amount: 0,
+        },
+        {
+          holders: [
+            {
+              address: bob.address,
+              balance: BigNumber.from(400),
+            },
+          ],
+          amount: 0,
+        },
+      ]);
     });
   });
 });

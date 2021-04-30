@@ -7,8 +7,8 @@ const { expect } = chai;
 const fs = require("fs");
 
 describe("Airdrop", () => {
-  let owner, alice, bob, carol, david, airdrop;
-  let mockERC20;
+  let owner, alice, bob, carol, david;
+  let mockERC20, airdrop;
 
   beforeEach(async () => {
     [owner, alice, bob, carol, david] = await ethers.getSigners();
