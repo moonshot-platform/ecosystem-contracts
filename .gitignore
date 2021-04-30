@@ -10,3 +10,4 @@ db/snapshot*.json
 db/holders.csv
 tmp/*
 out/*
+log/*

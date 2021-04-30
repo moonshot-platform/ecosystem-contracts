@@ -38,19 +38,19 @@ const main = async () => {
     contract,
     holders,
     AIRDROP_BATCH_LIMIT,
-    totalAmount
+    AIRDROP_AMOUNT
   );
 
-  if (failedBatches.isEmpty()) {
+  if (failedBatches.length == 0) {
     console.log("Airdrop successfully");
   } else {
     const errorsLogDir = "./log";
     fs.mkdir(errorsLogDir, () => {});
     const csvFile = fs.writeFileSync(
-      `${errorsLogDir / file}`,
+      `${errorsLogDir}/failedBatches.json`,
       JSON.stringify(failedBatches)
     );
-    console.log("Airdrop successfully");
+    console.log("Airdrop failed.");
   }
 };
 
