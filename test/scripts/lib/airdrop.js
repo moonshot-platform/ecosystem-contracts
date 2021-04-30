@@ -10,7 +10,7 @@ const {
   parseHolders,
   splitBatches,
   sendInBatches,
-} = require("../../scripts/lib/airdrop.js");
+} = require("../../../scripts/lib/airdrop.js");
 
 describe("airdrop lib", () => {
   describe("#parseHolders", () => {
