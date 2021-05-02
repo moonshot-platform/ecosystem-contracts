@@ -5,7 +5,7 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const { expect } = chai;
 const fs = require("fs");
-const { snapshot } = require("../../scripts/lib/snapshot.js");
+const { snapshot } = require("../../../scripts/lib/snapshot.js");
 
 describe("snapshot lib", () => {
   describe("#snapshot", () => {

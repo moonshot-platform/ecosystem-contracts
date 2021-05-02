@@ -5,7 +5,9 @@ typechain/
 artifacts/
 coverage*
 .env
+.env.test
 db/snapshot*.json
 db/holders.csv
 tmp/*
 out/*
+log/*
