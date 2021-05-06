@@ -89,7 +89,7 @@ Before running airdrop script, please check below steps:
 - Download list of holders in csv format from BSCscan.
 - Update the `OWNER_PRIVATE_KEY` in `.env` file to the deployer of Airdrop contract.
 - Update the `MOONSHOT_HOLDERS_CSV_PATH` in `.env` file to the absolute path of your list of holders in csv.
-- Update the `AIRDROP_AMOUNT` in `.env` file to a number between 0 and the Moonshot balance of your airdrop contract. The amount should be smaller than the balance for it to work without failure.
+- Update the `AIRDROP_AMOUNT` in `.env` file to a number between 0 and the Moonshot balance of your airdrop contract. The amount should be smaller than the balance for it to work without failure. The amount should not remove the last 9 decimals.
 - Update the `AIRDROP_CONTRACT_ADDRESS` in `.env` file.
 - Update the `AIRDROP_BATCH_LIMIT` to specify the chunks of airdrop you want to split
 - Then run command:
