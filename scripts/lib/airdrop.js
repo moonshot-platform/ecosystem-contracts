@@ -1,5 +1,6 @@
 const { ethers } = require("hardhat");
 const csvParse = require("csv-parse/lib/sync");
+const { Promise } = require("bluebird");
 
 const parseHolders = async (data) => {
   const holders = [];
@@ -45,31 +46,32 @@ const splitBatches = (holders, batch, totalAmount) => {
 };
 
 const sendInBatches = async (contract, holders, batch, totalAmount) => {
-  const batchHoldersWithAmountGroups = splitBatches(holders, batch, totalAmount); 
+  const groups = splitBatches(holders, batch, totalAmount);
+  let failedBatches = [];
 
-  const failedBatchesPromises = batchHoldersWithAmountGroups.map(async (batchHoldersWithAmountGroup) => {
-    const batchHolders = batchHoldersWithAmountGroup.holders;
-    let transaction
-
-    try {
-      transaction = await contract.sendBatch(
-        holders.map((holder) => {
+  await Promise.mapSeries(groups, (group) => {
+    const batchHolders = group.holders;
+    return contract
+      .sendBatch(
+        batchHolders.map((holder) => {
           return holder.address;
         }),
-        holders.map((holder) => {
+        batchHolders.map((holder) => {
           return holder.balance;
         }),
-        batchHoldersWithAmountGroup.amount,
-      );
-      console.log(
-        `Finished airdrop to ${batchHolders.length} holders at tx ${transaction.hash}`
-      );
-    } catch(e) {
-      console.log(`Failed to airdrop with errors: ${e}`);
-      return batchHoldersWithAmountGroup;
-    }
+        group.amount.toString()
+      )
+      .then((tx) => {
+        console.log(
+          `Finished airdrop to ${group.holders.length} holders at tx ${tx.hash}`
+        );
+      })
+      .catch((err) => {
+        console.log(`Failed to airdrop ${group.amount} to holders`);
+        failedBatches.push(group);
+      });
   });
-  const failedBatches = (await Promise.all(failedBatchesPromises)).filter((item) => { return item != undefined });
+
   return failedBatches;
 };
 

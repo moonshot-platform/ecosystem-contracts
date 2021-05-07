@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { ethers } = require("hardhat");
+const { BigNumber } = ethers;
 const fs = require("fs");
 const { sendInBatches, parseHolders } = require("./lib/airdrop.js");
 const csvParse = require("csv-parse/lib/sync");
@@ -7,8 +8,8 @@ const csvParse = require("csv-parse/lib/sync");
 // This command requires running snapshot first
 // CMD: npx hardhat run --network mainnet scripts/airdrop.js
 const main = async () => {
-  const AIRDROP_AMOUNT = process.env.AIRDROP_AMOUNT || 0;
-  const AIRDROP_BATCH_LIMIT = process.env.AIRDROP_BATCH_LIMIT || 100;
+  const AIRDROP_AMOUNT = BigNumber.from(process.env.AIRDROP_AMOUNT.toString() || "0");
+  const AIRDROP_BATCH_LIMIT = parseInt(process.env.AIRDROP_BATCH_LIMIT || 100);
   if (AIRDROP_AMOUNT <= 0)
     throw new Error("Airdrop amount must be greater than 0");
   const AIRDROP_CONTRACT_ADDRESS = process.env.AIRDROP_CONTRACT_ADDRESS || "";

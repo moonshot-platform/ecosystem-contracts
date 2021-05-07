@@ -38,9 +38,24 @@ describe("Airdrop", () => {
       expect(await airdrop.receivedRecipient(alice.address)).to.eq(true);
       expect(await airdrop.receivedRecipient(bob.address)).to.eq(true);
       expect(await airdrop.receivedRecipient(airdrop.address)).to.eq(false);
+      expect(await mockERC20.balanceOf(alice.address)).to.eq(50500);
+      expect(await mockERC20.balanceOf(bob.address)).to.eq(44490);
+      expect(await mockERC20.balanceOf(airdrop.address)).to.eq(10);
       await airdrop.initialize();
       expect(await airdrop.receivedRecipient(alice.address)).to.eq(false);
       expect(await airdrop.receivedRecipient(bob.address)).to.eq(false);
+      expect(await airdrop.receivedRecipient(airdrop.address)).to.eq(false);
+      await mockERC20.mint(airdrop.address, 1000);
+      await airdrop.sendBatch(
+        [alice.address, bob.address, airdrop.address],
+        [50000, 49000, 1000],
+        1000
+      );
+      expect(await mockERC20.balanceOf(alice.address)).to.be.above(50500);
+      expect(await mockERC20.balanceOf(bob.address)).to.be.above(44490);
+      expect(await mockERC20.balanceOf(airdrop.address)).to.be.above(10);
+      expect(await airdrop.receivedRecipient(alice.address)).to.eq(true);
+      expect(await airdrop.receivedRecipient(bob.address)).to.eq(true);
       expect(await airdrop.receivedRecipient(airdrop.address)).to.eq(false);
     });
   })

@@ -8,7 +8,8 @@
 Setting up by installing node modules:
 
 ```bash
-npm install
+npm install -g yarn
+yarn install
 ```
 
 ### Run local ethereum node
@@ -37,8 +38,11 @@ or run a specific test file:
 npx hardhat test path/to/test/file
 ```
 
+**NOTES**:
+
+
 ### Compile
-To run all test, use below command:
+To compile, use below command:
 
 ```
 npx hardhat compile
@@ -85,8 +89,9 @@ Before running airdrop script, please check below steps:
 - Download list of holders in csv format from BSCscan.
 - Update the `OWNER_PRIVATE_KEY` in `.env` file to the deployer of Airdrop contract.
 - Update the `MOONSHOT_HOLDERS_CSV_PATH` in `.env` file to the absolute path of your list of holders in csv.
-- Update the `AIRDROP_AMOUNT` in `.env` file to a number between 0 and the Moonshot balance of your airdrop contract. The amount should be smaller than the balance for it to work without failure.
+- Update the `AIRDROP_AMOUNT` in `.env` file to a number between 0 and the Moonshot balance of your airdrop contract. The amount should be smaller than the balance for it to work without failure. The amount should not remove the last 9 decimals.
 - Update the `AIRDROP_CONTRACT_ADDRESS` in `.env` file.
+- Update the `AIRDROP_BATCH_LIMIT` to specify the chunks of airdrop you want to split
 - Then run command:
 
 ```
@@ -108,14 +113,7 @@ npx hardhat run --network mainnet scripts/snapshot.js
 
 Output file will be stored into a json file in `db/snapshot-<NETWORK_NAME>.json`
 
-NOTES:
+**NOTES**:
 - Since BSC network might fluctuate and fails the request more than the default 5 times, increase the `MAX_RETRIES` to the number you think reasonable.
 - The snapshot doesn't work correctly for reflection tokens due to incorrect Transfer event value.
 
-### Airdrop script
-Before running airdrop, download list of holders from BSCscan into a csv file and pass the path of that file to environment variable `MOONSHOT_HOLDERS_CSV_PATH`.
-Then change `AIRDROP_AMOUNT` in the `.env` file to specify how much you want to airdrop.
-
-```bash
-npx hardhat run scripts/snapshot.js
-```
