@@ -4,6 +4,7 @@ const { Promise } = require("bluebird");
 
 const parseHolders = async (data) => {
   const holders = [];
+  const balanceMin = 30e15;
 
   const rows = csvParse(data, {
     columns: true,
@@ -15,11 +16,13 @@ const parseHolders = async (data) => {
   }
 
   rows.forEach((row) => {
-    const balance = parseFloat(row.Balance).toFixed(9);
-    holders.push({
-      address: row.HolderAddress,
-      balance: ethers.utils.parseEther(balance).div(1e9),
-    });
+    const balance = ethers.utils.parseEther(parseFloat(row.Balance).toFixed(9)).div(1e9);
+    if (balance >= balanceMin) {
+      holders.push({
+        address: row.HolderAddress,
+        balance: balance,
+      });
+    };
   });
 
   return holders;
