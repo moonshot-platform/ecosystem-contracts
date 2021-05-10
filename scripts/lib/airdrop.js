@@ -1,4 +1,5 @@
 const { ethers } = require("hardhat");
+const { BigNumber } = ethers;
 const csvParse = require("csv-parse/lib/sync");
 const { Promise } = require("bluebird");
 
@@ -78,6 +79,27 @@ const sendInBatches = async (contract, holders, batch, totalAmount) => {
   return failedBatches;
 };
 
+const estimateSendInBatches = async (contract, holders, batch, totalAmount) => {
+  const groups = splitBatches(holders, batch, totalAmount);
+  return await Promise.reduce(groups, (total, group) => {
+    const batchHolders = group.holders;
+    return contract
+      .estimateGas
+      .sendBatch(
+        batchHolders.map((holder) => {
+          return holder.address;
+        }),
+        batchHolders.map((holder) => {
+          return holder.balance;
+        }),
+        group.amount.toString()
+      )
+      .then((gas) => {
+        return gas.add(total);
+      })
+  }, 0);
+};
+
 const reducer = (sum, holder) => {
   return holder.balance.add(sum);
 };
@@ -86,4 +108,5 @@ module.exports = {
   parseHolders,
   splitBatches,
   sendInBatches,
+  estimateSendInBatches,
 };

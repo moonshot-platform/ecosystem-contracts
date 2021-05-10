@@ -10,6 +10,7 @@ const {
   parseHolders,
   splitBatches,
   sendInBatches,
+  estimateSendInBatches,
 } = require("../../../scripts/lib/airdrop.js");
 
 describe("airdrop lib", () => {
@@ -287,4 +288,47 @@ describe("airdrop lib", () => {
       ]);
     });
   });
+
+  describe("#estimateSendInBatches", () => {
+    let owner, alice, bob, carol;
+    let mockERC20, airdrop;
+
+    beforeEach(async () => {
+      [owner, alice, bob, carol] = await ethers.getSigners();
+      const MockERC20 = JSON.parse(
+        fs.readFileSync(
+          "./artifacts/contracts/test/MockERC20.sol/MockERC20.json"
+        )
+      );
+      mockERC20 = await deployContract(owner, MockERC20, []);
+      const Airdrop = JSON.parse(
+        fs.readFileSync("./artifacts/contracts/Airdrop.sol/Airdrop.json")
+      );
+      airdrop = await deployContract(owner, Airdrop, [mockERC20.address]);
+    });
+
+    it("should estimate the gas but not complete the tx", async () => {
+      await mockERC20.mint(airdrop.address, 1000);
+      const holders = [
+        {
+          address: alice.address,
+          balance: BigNumber.from(100),
+        },
+        {
+          address: bob.address,
+          balance: BigNumber.from(400),
+        },
+        {
+          address: carol.address,
+          balance: BigNumber.from(500),
+        },
+      ];
+      const gasFee = await estimateSendInBatches(airdrop, holders, 1, 1000);
+      console.log(gasFee.toString())
+      expect(gasFee).to.be.above(300000);
+      expect(await airdrop.receivedRecipient(alice.address)).to.be.false;
+      expect(await airdrop.receivedRecipient(bob.address)).to.be.false;
+      expect(await airdrop.receivedRecipient(carol.address)).to.be.false;
+    });
+  })
 });
