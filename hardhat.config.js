@@ -1,6 +1,7 @@
 require("dotenv").config();
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
+require("hardhat-gas-reporter");
 
 const OWNER_PRIVATE_KEY = process.env.OWNER_PRIVATE_KEY || "";
 const INFURA_API_KEY = process.env.INFURA_API_KEY || "";
@@ -47,4 +48,9 @@ module.exports = {
       },
     ],
   },
+  gasReporter: {
+    currency: 'BNB',
+    gasPrice: 21,
+    enabled: true,
+  }
 };
