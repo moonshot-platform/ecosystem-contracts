@@ -28,6 +28,11 @@ const main = async () => {
   const csvFile = fs.readFileSync(MOONSHOT_HOLDERS_CSV_PATH);
   const holders = await parseHolders(csvFile.toString());
 
+  console.log(
+    `Estimating transaction fee when airdropping ${AIRDROP_AMOUNT} Moonshot to ${
+      Object.keys(holders).length
+    } holders on ${network.name}`
+  );
   const gasUsed = await estimateSendInBatches(
     contract,
     holders,
@@ -35,7 +40,7 @@ const main = async () => {
     AIRDROP_AMOUNT
   );
   console.log(`Total gas used: ${gasUsed} gas`);
-  console.log(`Total estimated transaction fee: ${gasUsed.mul(10).toNumber() / 1.0e9} BNB`);
+  console.log(`Total estimated transaction fee: ${gasUsed.mul(10.0).toNumber() / 1e9} BNB`);
 };
 
 main()
