@@ -12,7 +12,6 @@ contract Airdrop is Context, Ownable {
 
     IERC20 public token;
     uint256 public batchLimit;
-    address[] private _received;
     mapping (uint256 => mapping (address => bool)) public receivedRecipient;
     uint256 public currentAirdropId;
     bool public started;
@@ -53,7 +52,6 @@ contract Airdrop is Context, Ownable {
             if (receivedRecipient[currentAirdropId][recipients[i]] != true && recipients[i] != address(this) && airdropAmount > 0) {
                 token.transfer(recipients[i], airdropAmount);
                 receivedRecipient[currentAirdropId][recipients[i]] = true;
-                _received.push(recipients[i]);
             }
         }
     }
