@@ -112,7 +112,7 @@ describe("airdrop lib", () => {
                 balance: BigNumber.from(15e9),
               },
             ],
-            amount: 850_000,
+            amount: BigNumber.from(850_000),
           },
           {
             holders: [
@@ -129,7 +129,7 @@ describe("airdrop lib", () => {
                 balance: BigNumber.from(3e9),
               },
             ],
-            amount: 120_000,
+            amount: BigNumber.from(120_000),
           },
           {
             holders: [
@@ -146,7 +146,7 @@ describe("airdrop lib", () => {
                 balance: ethers.utils.parseEther("0.000001").div(1e9),
               },
             ],
-            amount: 30_000,
+            amount: BigNumber.from(30_000),
           },
         ]);
       });
@@ -178,7 +178,7 @@ describe("airdrop lib", () => {
                 balance: BigNumber.from(4e9),
               },
             ],
-            amount: 940_000,
+            amount: BigNumber.from(940_000),
           },
           {
             holders: [
@@ -199,7 +199,7 @@ describe("airdrop lib", () => {
                 balance: ethers.utils.parseEther("0.000001").div(1e9),
               },
             ],
-            amount: 60_000,
+            amount: BigNumber.from(60_000),
           },
         ]);
       });
@@ -265,7 +265,7 @@ describe("airdrop lib", () => {
               balance: BigNumber.from(100),
             },
           ],
-          amount: 0,
+          amount: BigNumber.from(0),
         },
         {
           holders: [
@@ -274,7 +274,7 @@ describe("airdrop lib", () => {
               balance: BigNumber.from(400),
             },
           ],
-          amount: 0,
+          amount: BigNumber.from(0),
         },
         {
           holders: [
@@ -283,7 +283,7 @@ describe("airdrop lib", () => {
               balance: BigNumber.from(500),
             },
           ],
-          amount: 0,
+          amount: BigNumber.from(0),
         },
       ]);
     });

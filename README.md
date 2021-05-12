@@ -69,11 +69,13 @@ Verifying using hardhat is easy with [this guide](https://www.binance.org/en/blo
 Add your BSCscan or Etherscan API key as environment variable `BLOCK_EXPLORER_API_KEY`. Then run below command
 ```
 npx hardhat verify --network mainnet <CONTRACT_ADDRESS> "<CONSTRUCTOR_ARGUMENT_1>"
+// Airdrop contract for example:
+npx hardhat verify --network mainnet <AIRDROP_CONTRACT_ADDRESS> <MOONSHOT_CONTRACT_ADDRESS>
 ```
 This also works on BSC testnet.
 
 ### Flatten
-Sometimes we want to flatten the contract to verify on BSCscan easier. Run below command to flatten a contract:
+Sometimes we want to flatten the contract to manually verify on BSCscan easier. Run below command to flatten a contract:
 ```
 npx hardhat flatten <PATH_TO_CONTRACT> > <PATH_TO_FLATTEN_CONTRACT>
 ```

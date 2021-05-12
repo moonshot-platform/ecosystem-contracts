@@ -2,11 +2,10 @@ require("dotenv").config();
 const { ethers } = require("hardhat");
 const { BigNumber } = ethers;
 const fs = require("fs");
-const { sendInBatches, parseHolders } = require("./lib/airdrop.js");
+const { estimateSendInBatches, parseHolders } = require("./lib/airdrop.js");
 const csvParse = require("csv-parse/lib/sync");
 
-// This command requires running snapshot first
-// CMD: npx hardhat run --network mainnet scripts/airdrop.js
+// CMD: npx hardhat run --network mainnet scripts/estimateGasAirdrop.js
 const main = async () => {
   const AIRDROP_AMOUNT = BigNumber.from(process.env.AIRDROP_AMOUNT.toString() || "0");
   const AIRDROP_BATCH_LIMIT = parseInt(process.env.AIRDROP_BATCH_LIMIT || 100);
@@ -29,29 +28,14 @@ const main = async () => {
   const csvFile = fs.readFileSync(MOONSHOT_HOLDERS_CSV_PATH);
   const holders = await parseHolders(csvFile.toString());
 
-  console.log(
-    `Starting airdrop ${AIRDROP_AMOUNT} Moonshot to ${
-      Object.keys(holders).length
-    } holders on ${network.name}`
-  );
-  const failedBatches = await sendInBatches(
+  const gasUsed = await estimateSendInBatches(
     contract,
     holders,
     AIRDROP_BATCH_LIMIT,
     AIRDROP_AMOUNT
   );
-
-  if (failedBatches.length == 0) {
-    console.log("Airdrop successfully");
-  } else {
-    const errorsLogDir = "./log";
-    fs.mkdir(errorsLogDir, () => {});
-    const csvFile = fs.writeFileSync(
-      `${errorsLogDir}/failedBatches.json`,
-      JSON.stringify(failedBatches)
-    );
-    console.log("Airdrop failed.");
-  }
+  console.log(`Total gas used: ${gasUsed} gas`);
+  console.log(`Total estimated transaction fee: ${gasUsed.mul(10).toNumber() / 1.0e9} BNB`);
 };
 
 main()
