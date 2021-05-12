@@ -93,8 +93,14 @@ Before running airdrop script, please check below steps:
 - Update the `MOONSHOT_HOLDERS_CSV_PATH` in `.env` file to the absolute path of your list of holders in csv.
 - Update the `AIRDROP_AMOUNT` in `.env` file to a number between 0 and the Moonshot balance of your airdrop contract. The amount should be smaller than the balance for it to work without failure. The amount should not remove the last 9 decimals.
 - Update the `AIRDROP_CONTRACT_ADDRESS` in `.env` file.
-- Update the `AIRDROP_BATCH_LIMIT` to specify the chunks of airdrop you want to split
-- Then run command:
+- Update the `AIRDROP_BATCH_LIMIT` to specify the chunks of airdrop you want to split. The optimal number is 100 per batch.
+- Remember to finish the last airdrop and init the new airdrop before running a fresh airdrop.
+- Then run this command to estimate the transaction fee required for the airdrop:
+
+```
+npx hardhat run --network mainnet scripts/estimateGasAirdrop.js
+```
+- When everything is in place, run this command to airdrop:
 
 ```
 npx hardhat run --network mainnet scripts/airdrop.js
