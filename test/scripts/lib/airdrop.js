@@ -326,9 +326,10 @@ describe("airdrop lib", () => {
       const gasFee = await estimateSendInBatches(airdrop, holders, 1, 1000);
       console.log(gasFee.toString())
       expect(gasFee).to.be.above(300000);
-      expect(await airdrop.receivedRecipient(alice.address)).to.be.false;
-      expect(await airdrop.receivedRecipient(bob.address)).to.be.false;
-      expect(await airdrop.receivedRecipient(carol.address)).to.be.false;
+      let airdropId = await airdrop.currentAirdropId();
+      expect(await airdrop.receivedRecipient(airdropId, alice.address)).to.be.false;
+      expect(await airdrop.receivedRecipient(airdropId, bob.address)).to.be.false;
+      expect(await airdrop.receivedRecipient(airdropId, carol.address)).to.be.false;
     });
   })
 });
