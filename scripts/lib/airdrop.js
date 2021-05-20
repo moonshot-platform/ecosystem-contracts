@@ -1,9 +1,11 @@
 const { ethers } = require("hardhat");
+const { BigNumber } = ethers;
 const csvParse = require("csv-parse/lib/sync");
 const { Promise } = require("bluebird");
 
 const parseHolders = async (data) => {
   const holders = [];
+  const balanceMin = 30e15;
 
   const rows = csvParse(data, {
     columns: true,
@@ -15,11 +17,15 @@ const parseHolders = async (data) => {
   }
 
   rows.forEach((row) => {
-    const balance = parseFloat(row.Balance).toFixed(9);
-    holders.push({
-      address: row.HolderAddress,
-      balance: ethers.utils.parseEther(balance).div(1e9),
-    });
+    const balance = ethers.utils
+      .parseEther(parseFloat(row.Balance).toFixed(9))
+      .div(1e9);
+    if (balance >= balanceMin) {
+      holders.push({
+        address: row.HolderAddress,
+        balance: balance,
+      });
+    }
   });
 
   return holders;
@@ -35,8 +41,10 @@ const splitBatches = (holders, batch, totalAmount) => {
 
   for (i = 0; i < holders.length; i += batch) {
     const batchHolders = holders.slice(i, i + batch);
-    const batchAmount =
-      (batchHolders.reduce(reducer, 0) * totalAmount) / totalBalance;
+    const batchAmount = batchHolders
+      .reduce(reducer, 0)
+      .mul(totalAmount)
+      .div(totalBalance);
     batchHoldersWithAmount.push({
       holders: batchHolders,
       amount: batchAmount,
@@ -75,6 +83,30 @@ const sendInBatches = async (contract, holders, batch, totalAmount) => {
   return failedBatches;
 };
 
+const estimateSendInBatches = async (contract, holders, batch, totalAmount) => {
+  const groups = splitBatches(holders, batch, totalAmount);
+  return await Promise.reduce(
+    groups,
+    (total, group) => {
+      const batchHolders = group.holders;
+      return contract.estimateGas
+        .sendBatch(
+          batchHolders.map((holder) => {
+            return holder.address;
+          }),
+          batchHolders.map((holder) => {
+            return holder.balance;
+          }),
+          group.amount.toString()
+        )
+        .then((gas) => {
+          return gas.add(total);
+        });
+    },
+    0
+  );
+};
+
 const reducer = (sum, holder) => {
   return holder.balance.add(sum);
 };
@@ -83,4 +115,5 @@ module.exports = {
   parseHolders,
   splitBatches,
   sendInBatches,
+  estimateSendInBatches,
 };

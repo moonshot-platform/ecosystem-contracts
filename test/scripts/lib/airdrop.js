@@ -10,6 +10,7 @@ const {
   parseHolders,
   splitBatches,
   sendInBatches,
+  estimateSendInBatches,
 } = require("../../../scripts/lib/airdrop.js");
 
 describe("airdrop lib", () => {
@@ -24,23 +25,22 @@ describe("airdrop lib", () => {
 "address4","5.1e-05"
 "address5","1234567890123"
 "address6","12345678901234.5678"
+"address7","30000000"
+"address8","29999999"
 `;
       const holders = await parseHolders(input);
+      expect(holders.length).to.eq(5);
       expect(holders[0].address.toString()).to.eq("address0");
       expect(holders[0].balance.toString()).to.eq("1000000000000000000000000");
       expect(holders[1].address.toString()).to.eq("address1");
       expect(holders[1].balance.toString()).to.eq("110000000000000000000000");
-      expect(holders[2].address.toString()).to.eq("address2");
-      expect(holders[2].balance.toString()).to.eq("5");
-      expect(holders[3].address.toString()).to.eq("address3");
-      expect(holders[3].balance.toString()).to.eq("5");
-      expect(holders[4].address.toString()).to.eq("address4");
-      expect(holders[4].balance.toString()).to.eq("51000");
-      expect(holders[5].address.toString()).to.eq("address5");
-      expect(holders[5].balance.toString()).to.eq("1234567890123000000000");
+      expect(holders[2].address.toString()).to.eq("address5");
+      expect(holders[2].balance.toString()).to.eq("1234567890123000000000");
       // this one is weird because of floating point number
-      expect(holders[6].address.toString()).to.eq("address6");
-      expect(holders[6].balance.toString()).to.eq("12345678901234568359375");
+      expect(holders[3].address.toString()).to.eq("address6");
+      expect(holders[3].balance.toString()).to.eq("12345678901234568359375");
+      expect(holders[4].address.toString()).to.eq("address7");
+      expect(holders[4].balance.toString()).to.eq("30000000000000000");
     });
   });
 
@@ -112,7 +112,7 @@ describe("airdrop lib", () => {
                 balance: BigNumber.from(15e9),
               },
             ],
-            amount: 850_000,
+            amount: BigNumber.from(850_000),
           },
           {
             holders: [
@@ -129,7 +129,7 @@ describe("airdrop lib", () => {
                 balance: BigNumber.from(3e9),
               },
             ],
-            amount: 120_000,
+            amount: BigNumber.from(120_000),
           },
           {
             holders: [
@@ -146,7 +146,7 @@ describe("airdrop lib", () => {
                 balance: ethers.utils.parseEther("0.000001").div(1e9),
               },
             ],
-            amount: 30_000,
+            amount: BigNumber.from(30_000),
           },
         ]);
       });
@@ -178,7 +178,7 @@ describe("airdrop lib", () => {
                 balance: BigNumber.from(4e9),
               },
             ],
-            amount: 940_000,
+            amount: BigNumber.from(940_000),
           },
           {
             holders: [
@@ -199,7 +199,7 @@ describe("airdrop lib", () => {
                 balance: ethers.utils.parseEther("0.000001").div(1e9),
               },
             ],
-            amount: 60_000,
+            amount: BigNumber.from(60_000),
           },
         ]);
       });
@@ -207,11 +207,11 @@ describe("airdrop lib", () => {
   });
 
   describe("#sendInBatches", () => {
-    let owner, alice, bob;
+    let owner, alice, bob, carol;
     let mockERC20, airdrop;
 
     beforeEach(async () => {
-      [owner, alice, bob, carol, david] = await ethers.getSigners();
+      [owner, alice, bob, carol] = await ethers.getSigners();
       const MockERC20 = JSON.parse(
         fs.readFileSync(
           "./artifacts/contracts/test/MockERC20.sol/MockERC20.json"
@@ -250,9 +250,13 @@ describe("airdrop lib", () => {
           address: bob.address,
           balance: BigNumber.from(400),
         },
+        {
+          address: carol.address,
+          balance: BigNumber.from(500),
+        },
       ];
       const failedBatches = await sendInBatches(airdrop, holders, 1, 0);
-      expect(failedBatches.length).to.eq(2);
+      expect(failedBatches.length).to.eq(3);
       expect(failedBatches).to.eql([
         {
           holders: [
@@ -261,7 +265,7 @@ describe("airdrop lib", () => {
               balance: BigNumber.from(100),
             },
           ],
-          amount: 0,
+          amount: BigNumber.from(0),
         },
         {
           holders: [
@@ -270,9 +274,62 @@ describe("airdrop lib", () => {
               balance: BigNumber.from(400),
             },
           ],
-          amount: 0,
+          amount: BigNumber.from(0),
+        },
+        {
+          holders: [
+            {
+              address: carol.address,
+              balance: BigNumber.from(500),
+            },
+          ],
+          amount: BigNumber.from(0),
         },
       ]);
     });
   });
+
+  describe("#estimateSendInBatches", () => {
+    let owner, alice, bob, carol;
+    let mockERC20, airdrop;
+
+    beforeEach(async () => {
+      [owner, alice, bob, carol] = await ethers.getSigners();
+      const MockERC20 = JSON.parse(
+        fs.readFileSync(
+          "./artifacts/contracts/test/MockERC20.sol/MockERC20.json"
+        )
+      );
+      mockERC20 = await deployContract(owner, MockERC20, []);
+      const Airdrop = JSON.parse(
+        fs.readFileSync("./artifacts/contracts/Airdrop.sol/Airdrop.json")
+      );
+      airdrop = await deployContract(owner, Airdrop, [mockERC20.address]);
+    });
+
+    it("should estimate the gas but not complete the tx", async () => {
+      await mockERC20.mint(airdrop.address, 1000);
+      const holders = [
+        {
+          address: alice.address,
+          balance: BigNumber.from(100),
+        },
+        {
+          address: bob.address,
+          balance: BigNumber.from(400),
+        },
+        {
+          address: carol.address,
+          balance: BigNumber.from(500),
+        },
+      ];
+      const gasFee = await estimateSendInBatches(airdrop, holders, 1, 1000);
+      console.log(gasFee.toString())
+      expect(gasFee).to.be.above(0);
+      let airdropId = await airdrop.currentAirdropId();
+      expect(await airdrop.receivedRecipient(airdropId, alice.address)).to.be.false;
+      expect(await airdrop.receivedRecipient(airdropId, bob.address)).to.be.false;
+      expect(await airdrop.receivedRecipient(airdropId, carol.address)).to.be.false;
+    });
+  })
 });

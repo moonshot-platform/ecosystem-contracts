@@ -69,11 +69,13 @@ Verifying using hardhat is easy with [this guide](https://www.binance.org/en/blo
 Add your BSCscan or Etherscan API key as environment variable `BLOCK_EXPLORER_API_KEY`. Then run below command
 ```
 npx hardhat verify --network mainnet <CONTRACT_ADDRESS> "<CONSTRUCTOR_ARGUMENT_1>"
+// Airdrop contract for example:
+npx hardhat verify --network mainnet <AIRDROP_CONTRACT_ADDRESS> <MOONSHOT_CONTRACT_ADDRESS>
 ```
 This also works on BSC testnet.
 
 ### Flatten
-Sometimes we want to flatten the contract to verify on BSCscan easier. Run below command to flatten a contract:
+Sometimes we want to flatten the contract to manually verify on BSCscan easier. Run below command to flatten a contract:
 ```
 npx hardhat flatten <PATH_TO_CONTRACT> > <PATH_TO_FLATTEN_CONTRACT>
 ```
@@ -91,8 +93,14 @@ Before running airdrop script, please check below steps:
 - Update the `MOONSHOT_HOLDERS_CSV_PATH` in `.env` file to the absolute path of your list of holders in csv.
 - Update the `AIRDROP_AMOUNT` in `.env` file to a number between 0 and the Moonshot balance of your airdrop contract. The amount should be smaller than the balance for it to work without failure. The amount should not remove the last 9 decimals.
 - Update the `AIRDROP_CONTRACT_ADDRESS` in `.env` file.
-- Update the `AIRDROP_BATCH_LIMIT` to specify the chunks of airdrop you want to split
-- Then run command:
+- Update the `AIRDROP_BATCH_LIMIT` to specify the chunks of airdrop you want to split. The optimal number is 100 per batch.
+- Remember to finish the last airdrop and init the new airdrop before running a fresh airdrop.
+- Then run this command to estimate the transaction fee required for the airdrop:
+
+```
+npx hardhat run --network mainnet scripts/estimateGasAirdrop.js
+```
+- When everything is in place, run this command to airdrop:
 
 ```
 npx hardhat run --network mainnet scripts/airdrop.js
